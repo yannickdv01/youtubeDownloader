@@ -1,13 +1,15 @@
-from ast import And
-import imp
+from random import vonmisesvariate
 import sys
 from os.path import dirname, abspath
+from time import time
 sys.path.append(dirname(dirname(abspath(__file__))))
 
 import Frontend.Menu as Menu
 import Frontend.Home as Home
 import Backend.VideoDownloader as VideoDownloader
 from pytube import YouTube
+import Backend.Clearconsole as Clearconsole
+from colorama import Fore, Back, Style
 
 def DownloadPage():
     Menu.SelectionMenu("Download", [
@@ -21,6 +23,12 @@ def DownloadPage():
 def DownLoadSubPage():
     Link = input("Enter the link for the video you want to download: ")
     Video = VideoDownloader.GetVideoInfo(Link)
+    if Video == None:
+        Clearconsole.clearConsole()
+        print(Fore.RED + "Invalid link" + Style.RESET_ALL)
+        time.sleep(2)
+        DownLoadSubPage()
+
     #DisplayVideoInfo(video)
     Menu.SelectionMenu(f"Title: {Video.title} \n        Views: {Video.views} \n        Length: {Video.length}\n\n        Is this the video you want to download?", 
         [
@@ -33,36 +41,26 @@ def FormatSelection(video: YouTube):
     #print all resolutions
     Menu.SelectionMenu("Select the format you want to download", 
         [
-            Menu.MenuOption("Video", lambda: ResolutionSelection(video)),
+            Menu.MenuOption("Video", lambda: VideoDownloader.Youtube_Downloader(video, "mp4")),
             Menu.MenuOption("Audio", lambda: VideoDownloader.Youtube_Downloader(video, "mp3")),
             Menu.MenuOption("Go back", DownloadPage)
         ]
     ).display()
 
-#-----------------RESOLUTION SELECTION-----------------#
+#-----------------RESOLUTION SELECTION-----------------#For future use, need to add a way to get all the resolutions because of youtube's adaptive streaming
 def ResolutionSelection(video : YouTube):
-    #print all resolutions
-    for stream in video.streams:
-        print(stream.resolution, stream.type)
+    #Clearconsole.clearConsole()
+    #print("Getting available resolutions...")
 
-    #get all unique resolutions
-    resolutions = []
-    for stream in video.streams:
-        if stream.resolution not in resolutions and stream.resolution != None:
-            resolutions.append(stream.resolution)
-
-    #sort resolutions
-    resolutions.sort(key=lambda x: int(x.split("p")[0]))
+    options=[
+        Menu.MenuOption("360p", lambda: VideoDownloader.Youtube_Downloader(video, "mp4", "360p")),
+        Menu.MenuOption("720p", lambda: VideoDownloader.Youtube_Downloader(video, "mp4", "720p")),
+        #add go back and exit option
+        Menu.MenuOption("Home", Home.homescreen),
+        Menu.MenuOption("Go back to download page", DownloadPage),
+        Menu.MenuOption("Exit", exit),
+    ]
     
-    #create a list of options
-    
-    options = []
-    for resolution in resolutions:
-        options.append(Menu.MenuOption(resolution, lambda: VideoDownloader.Youtube_Downloader(video, "mp4")))
-    #add go back and exit option
-    options.append(Menu.MenuOption("Home", Home.homescreen))
-    options.append(Menu.MenuOption("Go back to download page", DownloadPage))
-    options.append(Menu.MenuOption("Exit", exit))
     Menu.SelectionMenu("Select the resolution you want to download", 
         options
     ).display()
@@ -78,3 +76,5 @@ def DownloadPlaylist():
             Menu.MenuOption("No", DownloadPage),
         ]
     ).display()
+
+

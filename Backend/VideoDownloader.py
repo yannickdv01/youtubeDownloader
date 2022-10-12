@@ -1,3 +1,8 @@
+from audioop import adpcm2lin
+import sys
+from os.path import dirname, abspath
+sys.path.append(dirname(dirname(abspath(__file__))))
+
 from pytube import YouTube
 from pytube.cli import on_progress
 from colorama import Fore, Back, Style
@@ -23,13 +28,15 @@ def DisplayVideoInfo(video : YouTube):
     print("Length: " + video.length)
 
 def Youtube_Downloader(video : YouTube, format : str, resolution : str = ""):
-    try:
-        
-            
+    try:  
         print(Fore.GREEN + "Downloading...")
         #downloading the video
-        #get.download()
-        video.streams.filter(progressive=True, file_extension=format, res=resolution).first().download()
+        
+        if format == "mp4":
+            video.streams.get_highest_resolution().download()
+        else:
+            video.streams.filter(adaptive=True, type = "audio", file_extension="webm").first().download()
+
         print("Video downloaded, you will be sent back to the homepage in a few seconds :)" + Style.RESET_ALL)
 
         time.sleep(2)
