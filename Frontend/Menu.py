@@ -3,6 +3,7 @@ import sys
 from os.path import dirname, abspath
 sys.path.append(dirname(dirname(abspath(__file__))))
 import Backend.Clearconsole as clearConsole
+from colorama import Fore, Back, Style
 
 class SelectionMenu:
     def __init__(self, name, Options):
@@ -28,14 +29,14 @@ class SelectionMenu:
             print(str(i+1) + ". " + self.Options[i].name)
 
         #get user input
-        choice = input("Enter your choice: ")
+        choice = input(Fore.WHITE + "Enter your choice: ")
         #check if input is valid
         if choice.isdigit():
             choice = int(choice)
             if choice > 0 and choice <= len(self.Options):
                 self.select(choice)
             else:
-                print("Invalid choice")
+                print(Fore.RED + "Invalid choice")
                 self.display()
 
     def select(self, choice):
